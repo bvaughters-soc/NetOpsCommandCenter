@@ -1,0 +1,97 @@
+# NetOps Command Center - .gitignore
+
+# ============================================
+# CREDENTIALS - NEVER COMMIT THESE!
+# ============================================
+tacacs_env.sh
+credentials.json
+devices_config.json
+*.env
+.env.*
+api_keys.txt
+secrets/
+
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# ============================================
+# IDEs and Editors
+# ============================================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# ============================================
+# Operating Systems
+# ============================================
+.DS_Store
+.AppleDouble
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ============================================
+# Application Output Files
+# ============================================
+device_output.json
+batch_results.json
+report_*.json
+output.json
+results_*.json
+*.log
+logs/
+*.tmp
+*.bak
+*.backup
+
+# ============================================
+# Docker
+# ============================================
+docker-compose.override.yml
+
+# ============================================
+# Security
+# ============================================
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# ============================================
+# Project Specific
+# ============================================
+my_devices.json
+production_devices.json
+local_settings.py
+config.local.py
