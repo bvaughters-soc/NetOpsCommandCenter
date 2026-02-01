@@ -45,7 +45,7 @@ class DeviceCredentials:
     password: str
     enable_password: Optional[str] = None
     port: Optional[int] = None
-    device_type: DeviceType = DeviceType.MIKROTIK
+    device_type: DeviceType = DeviceType.CIENA
     connection_type: ConnectionType = ConnectionType.SSH
     timeout: int = 30
 
