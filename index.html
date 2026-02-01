@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetOps Command Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-card: #151922;
+            --bg-card-hover: #1a1f2e;
+            --accent-cyan: #00f5ff;
+            --accent-magenta: #ff00aa;
+            --accent-orange: #ff6b35;
+            --text-primary: #e8eaed;
+            --text-secondary: #9ca3af;
+            --border-color: #2a2f3a;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(0, 245, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 0, 170, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(255, 107, 53, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+            animation: pulse 15s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 3rem 0;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            animation: slideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tagline {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            animation: fadeIn 1s ease-out 0.3s backwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            border-bottom: 1px solid var(--border-color);
+            animation: fadeIn 1s ease-out 0.5s backwards;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .tab::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            color: var(--accent-cyan);
+        }
+
+        .tab.active::after {
+            transform: scaleX(1);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.05), rgba(255, 0, 170, 0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 245, 255, 0.2);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-magenta));
+            border-radius: 2px;
+        }
+
+        /* Form elements */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        input, select, textarea {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 245, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-cyan);
+            background: var(--bg-card-hover);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Results section */
+        .results-container {
+            margin-top: 2rem;
+        }
+
+        .result-item {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .result-command {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .result-output {
+            background: #000;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #00ff00;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        /* Status badges */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        /* Loading spinner */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 245, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent-cyan);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Alert */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        /* Checkbox styling */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--accent-cyan);
+        }
+
+        .checkbox-label {
+            color: var(--text-primary);
+            cursor: pointer;
+            margin: 0;
+            text-transform: none;
+            letter-spacing: normal;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Hide scrollbar but keep functionality */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-cyan);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="logo">NetOps</h1>
+            <p class="tagline">Command Center</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="single">Single Device</button>
+            <button class="tab" data-tab="batch">Batch Operations</button>
+            <button class="tab" data-tab="history">History</button>
+        </div>
+
+        <!-- Single Device Tab -->
+        <div id="single" class="tab-content active">
+            <div class="card">
+                <h2 class="card-title">Device Connection</h2>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="ip_address">IP Address</label>
+                        <input type="text" id="ip_address" placeholder="192.168.1.1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="device_type">Device Type</label>
+                        <select id="device_type" required>
+                            <option value="">Select Device Type</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="connection_type">Connection</label>
+                        <select id="connection_type">
+                            <option value="ssh">SSH</option>
+                            <option value="telnet">Telnet</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="port">Port (Optional)</label>
+                        <input type="number" id="port" placeholder="22 or 23">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="username">TACACS Username</label>
+                        <input type="text" id="username" placeholder="your_tacacs_user" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">TACACS Password</label>
+                        <input type="password" id="password" placeholder="••••••••" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="enable_password">Enable Password (Optional)</label>
+                        <input type="password" id="enable_password" placeholder="••••••••">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="timeout">Timeout (seconds)</label>
+                        <input type="number" id="timeout" value="30" min="5" max="120">
+                    </div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="use_basic" checked>
+                    <label for="use_basic" class="checkbox-label">Use basic diagnostic commands</label>
+                </div>
+
+                <div class="form-group" id="custom_commands_group" style="display: none;">
+                    <label for="custom_commands">Custom Commands (one per line)</label>
+                    <textarea id="custom_commands" placeholder="show version&#10;show running-config&#10;show interface brief"></textarea>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="executeBtn">
+                        <span>Execute Commands</span>
+                    </button>
+                    <button class="btn btn-secondary" id="clearBtn">
+                        <span>Clear Form</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="results" class="results-container"></div>
+        </div>
+
+        <!-- Batch Operations Tab -->
+        <div id="batch" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">Batch Device Configuration</h2>
+                
+                <div class="form-group">
+                    <label for="batch_config">Device Configuration (JSON)</label>
+                    <textarea id="batch_config" style="min-height: 300px;" placeholder='{
+  "devices": [
+    {
+      "name": "Switch 1",
+      "ip_address": "192.168.1.10",
+      "username": "admin",
+      "password": "password",
+      "device_type": "brocade_icx",
+      "connection_type": "ssh"
+    }
+  ]
+}'></textarea>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="batch_use_basic" checked>
+                    <label for="batch_use_basic" class="checkbox-label">Use basic diagnostic commands</label>
+                </div>
+
+                <div class="form-group" id="batch_custom_commands_group" style="display: none;">
+                    <label for="batch_custom_commands">Custom Commands (one per line)</label>
+                    <textarea id="batch_custom_commands" placeholder="show version&#10;show system"></textarea>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="batchExecuteBtn">
+                        <span>Execute Batch</span>
+                    </button>
+                    <button class="btn btn-secondary" id="loadTemplateBtn">
+                        <span>Load Template</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="batch_results" class="results-container"></div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="history" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">Execution History</h2>
+                <p style="color: var(--text-secondary); margin-top: 1rem;">
+                    Recent command executions will appear here. Results are stored in browser memory and will be lost on page refresh.
+                </p>
+                <div id="history_list" style="margin-top: 2rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        let executionHistory = [];
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.dataset.tab;
+                
+                // Update tabs
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(targetTab).classList.add('active');
+            });
+        });
+
+        // Load device types on page load
+        async function loadDeviceTypes() {
+            try {
+                const response = await fetch(`${API_URL}/device-types`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const select = document.getElementById('device_type');
+                    data.device_types.forEach(type => {
+                        const option = document.createElement('option');
+                        option.value = type.value;
+                        option.textContent = type.label;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading device types:', error);
+            }
+        }
+
+        // Toggle custom commands
+        document.getElementById('use_basic').addEventListener('change', (e) => {
+            document.getElementById('custom_commands_group').style.display = 
+                e.target.checked ? 'none' : 'block';
+        });
+
+        document.getElementById('batch_use_basic').addEventListener('change', (e) => {
+            document.getElementById('batch_custom_commands_group').style.display = 
+                e.target.checked ? 'none' : 'block';
+        });
+
+        // Execute single device commands
+        document.getElementById('executeBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('executeBtn');
+            const resultsDiv = document.getElementById('results');
+            
+            // Validate inputs
+            const ip = document.getElementById('ip_address').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const deviceType = document.getElementById('device_type').value;
+            
+            if (!ip || !username || !password || !deviceType) {
+                showAlert('error', 'Please fill in all required fields');
+                return;
+            }
+            
+            // Disable button and show loading
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> <span>Executing...</span>';
+            
+            // Prepare request
+            const useBasic = document.getElementById('use_basic').checked;
+            const commands = useBasic ? [] : 
+                document.getElementById('custom_commands').value.split('\n').filter(c => c.trim());
+            
+            const requestData = {
+                ip_address: ip,
+                username: username,
+                password: password,
+                device_type: deviceType,
+                connection_type: document.getElementById('connection_type').value,
+                port: document.getElementById('port').value || null,
+                enable_password: document.getElementById('enable_password').value || null,
+                timeout: parseInt(document.getElementById('timeout').value),
+                use_basic_commands: useBasic,
+                commands: commands
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/execute`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResults(data.results, resultsDiv);
+                    addToHistory({
+                        type: 'single',
+                        device: ip,
+                        timestamp: data.timestamp,
+                        success: true
+                    });
+                    showAlert('success', `Successfully executed commands on ${ip}`);
+                } else {
+                    showAlert('error', `Error: ${data.error}`);
+                }
+            } catch (error) {
+                showAlert('error', `Connection error: ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Execute Commands</span>';
+            }
+        });
+
+        // Execute batch commands
+        document.getElementById('batchExecuteBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('batchExecuteBtn');
+            const resultsDiv = document.getElementById('batch_results');
+            
+            try {
+                const config = JSON.parse(document.getElementById('batch_config').value);
+                const useBasic = document.getElementById('batch_use_basic').checked;
+                const commands = useBasic ? [] :
+                    document.getElementById('batch_custom_commands').value.split('\n').filter(c => c.trim());
+                
+                btn.disabled = true;
+                btn.innerHTML = '<span class="loading"></span> <span>Executing Batch...</span>';
+                
+                const requestData = {
+                    devices: config.devices,
+                    use_basic_commands: useBasic,
+                    commands: commands
+                };
+                
+                const response = await fetch(`${API_URL}/batch-execute`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayBatchResults(data.results, resultsDiv);
+                    addToHistory({
+                        type: 'batch',
+                        devices: data.total,
+                        timestamp: data.timestamp,
+                        success: data.successful,
+                        failed: data.failed
+                    });
+                    showAlert('success', `Batch complete: ${data.successful}/${data.total} successful`);
+                } else {
+                    showAlert('error', `Error: ${data.error}`);
+                }
+            } catch (error) {
+                showAlert('error', `Error: ${error.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Execute Batch</span>';
+            }
+        });
+
+        // Display results
+        function displayResults(results, container) {
+            container.innerHTML = '';
+            
+            Object.entries(results).forEach(([command, output]) => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `
+                    <div class="result-header">
+                        <span class="result-command">${escapeHtml(command)}</span>
+                        <span class="status-badge status-success">Success</span>
+                    </div>
+                    <div class="result-output">${escapeHtml(output)}</div>
+                `;
+                container.appendChild(resultItem);
+            });
+        }
+
+        // Display batch results
+        function displayBatchResults(results, container) {
+            container.innerHTML = '';
+            
+            results.forEach(result => {
+                const resultCard = document.createElement('div');
+                resultCard.className = 'card';
+                
+                const status = result.status === 'success' ? 'status-success' : 'status-error';
+                
+                let content = `
+                    <div class="result-header">
+                        <h3 style="margin: 0; color: var(--text-primary);">${result.device_name} (${result.ip_address})</h3>
+                        <span class="status-badge ${status}">${result.status}</span>
+                    </div>
+                `;
+                
+                if (result.status === 'success') {
+                    Object.entries(result.results).forEach(([command, output]) => {
+                        content += `
+                            <div style="margin-top: 1rem;">
+                                <div class="result-command" style="margin-bottom: 0.5rem;">${escapeHtml(command)}</div>
+                                <div class="result-output">${escapeHtml(output)}</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    content += `<div class="alert alert-error" style="margin-top: 1rem;">${result.error}</div>`;
+                }
+                
+                resultCard.innerHTML = content;
+                container.appendChild(resultCard);
+            });
+        }
+
+        // Show alert
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            const activeTab = document.querySelector('.tab-content.active');
+            activeTab.insertBefore(alertDiv, activeTab.firstChild);
+            
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+
+        // Add to history
+        function addToHistory(item) {
+            executionHistory.unshift(item);
+            updateHistoryDisplay();
+        }
+
+        // Update history display
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('history_list');
+            historyList.innerHTML = '';
+            
+            if (executionHistory.length === 0) {
+                historyList.innerHTML = '<p style="color: var(--text-secondary);">No execution history yet.</p>';
+                return;
+            }
+            
+            executionHistory.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'result-item';
+                
+                let content = `<div class="result-header">`;
+                
+                if (item.type === 'single') {
+                    content += `
+                        <span style="color: var(--text-primary);">Device: ${item.device}</span>
+                        <span class="status-badge status-success">Success</span>
+                    `;
+                } else {
+                    content += `
+                        <span style="color: var(--text-primary);">Batch: ${item.success}/${item.devices} devices</span>
+                        <span class="status-badge ${item.failed > 0 ? 'status-error' : 'status-success'}">
+                            ${item.failed > 0 ? item.failed + ' Failed' : 'All Success'}
+                        </span>
+                    `;
+                }
+                
+                content += `</div>`;
+                content += `<p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 0.9rem;">
+                    ${new Date(item.timestamp).toLocaleString()}
+                </p>`;
+                
+                historyItem.innerHTML = content;
+                historyList.appendChild(historyItem);
+            });
+        }
+
+        // Clear form
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            document.getElementById('ip_address').value = '';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('enable_password').value = '';
+            document.getElementById('custom_commands').value = '';
+            document.getElementById('results').innerHTML = '';
+        });
+
+        // Load template
+        document.getElementById('loadTemplateBtn').addEventListener('click', () => {
+            const template = {
+                devices: [
+                    {
+                        name: "Switch 1",
+                        ip_address: "192.168.1.10",
+                        username: "admin",
+                        password: "password",
+                        device_type: "brocade_icx",
+                        connection_type: "ssh"
+                    },
+                    {
+                        name: "Router 1",
+                        ip_address: "192.168.1.1",
+                        username: "admin",
+                        password: "password",
+                        enable_password: "enable_pass",
+                        device_type: "ciena",
+                        connection_type: "ssh"
+                    }
+                ]
+            };
+            document.getElementById('batch_config').value = JSON.stringify(template, null, 2);
+        });
+
+        // Utility function
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize
+        loadDeviceTypes();
+        updateHistoryDisplay();
+    </script>
+</body>
+</html>
